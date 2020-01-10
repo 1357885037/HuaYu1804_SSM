@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<html xmlns:th="http://www.thymeleaf.org" >
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<form action="/updateTwo.do">
+    <input type="hidden"  name="number" th:value="${book.number}">
+
+    名称：<input type="text" th:value="${book.name}"    name="name"><br>
+    作者: <input type="text" th:value="${book.zuoze}"   name="zuoze"><br>
+    价格: <input type="text" th:value="${book.price}"   name="price"><br>
+    简介: <input type="text" th:value="${book.jianjie}" name="jianjie"><br>
+    类别：<select name="nid"><option th:each="b:${list}" th:value="${b.nid}" th:selected="${b.nid == book.nid }"   >[[${b.nname}]]</option></select>
+    <input type="submit" value=提交>
+
+</form>
+</body>
+</html>

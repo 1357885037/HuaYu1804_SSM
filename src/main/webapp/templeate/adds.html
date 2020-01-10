@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<form action="/addBookTwo.do" method="post">
+    <table id="sss">
+        <tr><td>名称：<input type="text"    name="name" ></td>
+            <td>作者: <input type="text"    name="zuoze"></td>
+            <td>价格: <input type="text"    name="price"></td>
+            <td>简介: <input type="text"    name="jianjie"></td>>
+            <td>类别：<select name="nid"><option th:each="b:${list}" th:value="${b.nid}">[[${b.nname}]]</option></select></td>
+        </tr>
+    </table>
+    <input type="submit" value="提交">
+</form>
+</body>
+</html>

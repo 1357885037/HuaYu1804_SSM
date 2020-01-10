@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Layui</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="layui/css/layui.css"  media="all">
+    <!-- 注意：如果你直接复制所有代码到本地，上述css路径需要改成你本地的 -->
+</head>
+<body>
+<script src="js/jquery-3.3.1.js"></script>
+<script src="layui/layui.js" charset="utf-8"></script>
+
+<!-- 注意：如果你直接复制所有代码到本地，上述js路径需要改成你本地的 -->
+
+<script type="text/html" id="titleTpl">
+    {{#  if(d.nid == 2){ }}
+    历史类
+    {{#  } else { }}
+    政治类
+    {{#  } }}
+</script>
+
+<script id="barDemo" type="text/html">
+    <a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>
+    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+</script>
+
+
+<table class="layui-hide" id="test" lay-filter='tests'></table>
+<script>
+    layui.use(['table','layer'], function(){
+        var table = layui.table;
+        table.render({
+            elem: '#test'
+            ,url:'/query.do'
+            ,cellMinWidth: 80 //全局定义常规单元格的最小宽度，layui 2.2.1 新增
+            ,toolbar: '#toolbarDemo' //开启头部工具栏，并为其绑定左侧模板
+            ,defaultToolbar: ['filter', 'exports', 'print', { //自定义头部工具栏右侧图标。如无需自定义，去除该参数即可
+                title: '提示'
+                ,layEvent: 'LAYTABLE_TIPS'
+                ,icon: 'layui-icon-tips'
+            }]
+            ,cols: [[
+                {type:'checkbox'}            /*多选框*/
+                ,{type:'numbers',width:80,title:'编号'}
+                ,{field:'name', width:80, title: '名称'}
+                ,{field:'zuoze', width:80, title: '作者', sort: true}
+                ,{field:'price', width:80, title: '价格'}
+                ,{field:'jianjie', width:80, title: '简介', sort: true,align:'right'}
+                ,{field:'nid', width:80, title: '类别', sort: true,templet:'#titleTpl'}
+                ,{field:'datebook', width:120, title: '入库时间'}
+                ,{width:178, title: '操作', toolbar: '#barDemo'}
+            ]]
+            ,page: true
+            ,limit:3
+            ,limits:[5,7,10]     /*设置一页显示几条*/
+        });
+
+
+        //监听工具条
+        table.on('tool(tests)', function(obj){ //注：tool 是工具条事件名，test 是 table 原始容器的属性 lay-filter="对应的值"
+            var data = obj.data; //获得当前行数据
+            var layEvent = obj.event; //获得 lay-event 对应的值（也可以是表头的 event 参数对应的值）
+            var tr = obj.tr; //获得当前行 tr 的 DOM 对象（如果有的话）
+
+            if(layEvent === 'detail'){ //查看
+                //do somehing
+            } else if(layEvent === 'del'){ //删除
+                layer.confirm('真的删除行么', function(index){
+                    obj.del(); //删除对应行（tr）的DOM结构，并更新缓存
+                    layer.close(index);
+                    //向服务端发送删除指令
+                });
+            } else if(layEvent === 'edit'){ //编辑
+                //do something
+
+
+            }
+        });
+
+
+
+    });
+
+
+
+</script>
+
+</body>
+</html>

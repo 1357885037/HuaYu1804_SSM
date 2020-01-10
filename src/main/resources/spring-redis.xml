@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:cache="http://www.springframework.org/schema/cache"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd
+       http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd
+       http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+       http://www.springframework.org/schema/mvc
+       http://www.springframework.org/schema/mvc/spring-mvc-4.2.xsd
+       http://www.springframework.org/schema/cache
+       http://www.springframework.org/schema/cache/spring-cache.xsd
+">
+
+
+        <context:property-placeholder location="classpath:setting.properties"/>
+
+    <!-- redis连接池 -->
+        <bean id="poolConfig" class="redis.clients.jedis.JedisPoolConfig">
+        <property name="maxIdle" value="${redis.maxIdle}"/>
+        <property name="maxWaitMillis" value="${redis.maxWait}" />
+        <property name="testOnBorrow" value="${redis.testOnBorrow}"/>
+        </bean>
+
+    <!-- 连接池配置，类似数据库连接池 -->
+        <bean id="factory" class="org.springframework.data.redis.connection.jedis.JedisConnectionFactory">
+        <property name="hostName" value="${redis.host}"/>
+        <property name="port" value="${redis.port}"/>
+        <property name="password" value="${redis.pass}"/>
+        <property name="database" value="${redis.database}"/>
+        <property name="timeout" value="${redis.timeout}"/>
+        <property name="poolConfig" ref="poolConfig"/>
+        </bean>
+
+       <bean id="redisConnRef" class="com.huayu.cache.RedisConnRef">
+           <property name="connectionFactory" ref="factory"></property>
+        </bean>
+
+        <!--redis操作模版,使用该对象可以操作redis  -->
+        <bean id="redisTemplate" class="org.springframework.data.redis.core.RedisTemplate">
+                <property name="connectionFactory" ref="factory"/>
+                <!--
+                将数据存放到Redis中，以及数据读取。这里必然涉及到数据的系列化和反系列化
+                如果不配置Serializer，那么存储的时候缺省使用String，如果用User类型存储，
+                那么会提示错误User can't cast to String！！
+                -->
+                <property name="keySerializer" >
+                        <bean class="org.springframework.data.redis.serializer.StringRedisSerializer" />
+                </property>
+                <property name="valueSerializer" >
+                        <bean class="org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer" />
+                </property>
+                <property name="hashKeySerializer">
+                        <bean class="org.springframework.data.redis.serializer.StringRedisSerializer"/>
+                </property>
+                <property name="hashValueSerializer">
+                        <bean class="org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer"/>
+                </property>
+                <!--开启事务  -->
+                <property name="enableTransactionSupport" value="true"></property>
+        </bean>
+
+        <!-- 配置CacheManager -->
+        <bean id="redisCacheManager" class="org.springframework.data.redis.cache.RedisCacheManager">
+                <constructor-arg name="redisOperations" ref="redisTemplate"/>
+        </bean>
+
+         <cache:annotation-driven cache-manager="redisCacheManager"></cache:annotation-driven>
+
+
+
+        </beans>
